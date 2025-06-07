@@ -159,6 +159,11 @@ if (NOT TARGET ggml AND NOT LLAMA_USE_SYSTEM_GGML)
     # ... otherwise assume ggml is added by a parent CMakeLists.txt
 endif()
 
+if (MINGW)
+    # Target Windows 8 for PrefetchVirtualMemory
+    add_compile_definitions(_WIN32_WINNT=${GGML_WIN_VER})
+endif()
+
 #
 # build the library
 #
@@ -252,20 +257,3 @@ configure_file(cmake/llama.pc.in
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/llama.pc"
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-
-#
-# copy the license files
-#
-
-# Check if running in GitHub Actions
-if(DEFINED ENV{GITHUB_ACTIONS} AND "$ENV{GITHUB_ACTIONS}" STREQUAL "true")
-    message(STATUS "Running inside GitHub Actions - copying license files")
-
-    # Copy all files from licenses/ to build/bin/
-    file(GLOB LICENSE_FILES "${CMAKE_SOURCE_DIR}/licenses/*")
-    foreach(LICENSE_FILE ${LICENSE_FILES})
-        get_filename_component(FILENAME ${LICENSE_FILE} NAME)
-        configure_file(${LICENSE_FILE} "${CMAKE_BINARY_DIR}/bin/${FILENAME}" COPYONLY)
-    endforeach()
-endif()
-
